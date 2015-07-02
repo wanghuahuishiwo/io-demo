@@ -1,15 +1,8 @@
 package com.netease.io;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -44,6 +37,8 @@ public class Test {
         System.out.println("==================>");
         System.out.println("nio cost:" + (end - start));
         System.out.println("<==================");
+
+
 
 
 

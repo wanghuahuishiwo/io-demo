@@ -1,4 +1,4 @@
-package com.netease.socket;
+package com.netease.socket.onethread;
 
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
