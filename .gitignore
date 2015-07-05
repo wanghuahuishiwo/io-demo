@@ -2,3 +2,4 @@ io-deni/.idea/.name
 *.class
 */.idea/*
 io-deni/io-deni.iml
+io-deni/target/MANIFEST.MF
