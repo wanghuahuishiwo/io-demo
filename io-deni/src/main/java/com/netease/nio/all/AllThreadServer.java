@@ -2,6 +2,7 @@ package com.netease.nio.all;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -28,35 +29,61 @@ public class AllThreadServer {
             serverSocketChannel.bind(new InetSocketAddress(9999));
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-            new Thread(new Runnable() {
+            System.out.println("server start.");
 
-                @Override
-                public void run() {
-                    while (true) {
+            while (true) {
+                try {
+                    selector.select();
+                    Set<SelectionKey> keys = selector.selectedKeys();
+                    Iterator<SelectionKey> itr = keys.iterator();
+                    while (itr.hasNext()) {
+                        final SelectionKey key = itr.next();
+                        itr.remove();
+
+                        Long id =  Thread.currentThread().getId();
                         try {
-                            selector.select();
-                            Set<SelectionKey> keys = selector.selectedKeys();
-                            Iterator<SelectionKey> itr = keys.iterator();
-                            while (itr.hasNext()) {
-                                SelectionKey key = itr.next();
-                                if(key.isAcceptable()) {
-                                    ServerSocketChannel server = (ServerSocketChannel)key.channel();
-                                    server.accept();
-
-                                }
-
+                            if(key.isAcceptable()) {
+                                System.out.println("id:" + id + ", isAcceptable");
+                                ServerSocketChannel server = (ServerSocketChannel)key.channel();
+                                SocketChannel sockteChannel = server.accept();
+                                sockteChannel.configureBlocking(false);
+                                sockteChannel.register(selector, SelectionKey.OP_READ, ByteBuffer.allocate(2048));
                             }
-
+                            else if(key.isReadable()) {
+                                System.out.println("id:" + id + ", read");
+                                SocketChannel socketChannel = (SocketChannel)key.channel();
+                                ByteBuffer readBuffer = (ByteBuffer)key.attachment();
+                                int count = socketChannel.read(readBuffer);
+                                if(count > 0) {
+                                    String s = new String(readBuffer.array(),0,readBuffer.limit());
+                                    System.out.println("id:" + id + ", " + s);
+                                    socketChannel.register(selector, SelectionKey.OP_WRITE);
+                                    //key.interestOps(SelectionKey.OP_READ|SelectionKey.OP_WRITE);
+                                }
+                                else {
+                                    System.out.println("id:" + id + ", read none datas.");
+                                    socketChannel.close();
+                                }
+                                System.out.println("id:" + id + ", read finish.");
+                            }
+                            else if(key.isWritable()) {
+                                System.out.println("id:" + id + ", write");
+                                SocketChannel sockteChannel = (SocketChannel)key.channel();
+                                //sockteChannel.register(selector, SelectionKey.OP_READ);
+                                ByteBuffer s = (ByteBuffer) key.attachment();
+                                System.out.println("id:" + id + ", att:" + new String(s.array()));
+                                s.flip();
+                                sockteChannel.write(s);
+                                System.out.println("id:" + id + ", write finish.");
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-            }).start();
-
-
-
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

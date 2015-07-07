@@ -28,15 +28,16 @@ public class OneThreadClient {
             int write = channel.write(ByteBuffer.wrap(user.toString().getBytes()));
             System.out.println("write:" + write);
 
-            Thread.sleep(1000);
-            ByteBuffer bb = ByteBuffer.allocate(128);
+            Thread.sleep(100);
+            ByteBuffer bb = ByteBuffer.allocate(2048);
             int flag = channel.read(bb);
+            System.out.println("flag:"+ flag);
             while(flag > 0) {
 
                 bb.flip();
                 int limit = bb.limit();
 
-                System.out.println(new String(bb.array(), 0 , limit));
+                System.out.println("read:" + new String(bb.array(), 0 , limit));
 
 //                System.out.println("limit:" + bb.limit());
 //                System.out.println("capacity:" + bb.capacity());
